@@ -1,0 +1,38 @@
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    container_name: telemetry_db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  api:
+    build: .
+    container_name: telemetry_api
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONPATH=/app
+      - FLASK_APP=api.app
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@timescaledb:5432/${POSTGRES_DB}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - AGENT_PASSWORD=${AGENT_PASSWORD}
+
+    depends_on:
+      - timescaledb
+
+    command: bash -c "python scripts/init_db.py && gunicorn -b 0.0.0.0:5000 api.app:app"
+
+volumes:
+  timescale_data:
+
+
+

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Skynet Telemetry</title>
+
+    <script>
+        const serverToken="{{ token }}"
+        if (serverToken) {
+            localStorage.setItem('jwt_token', serverToken)
+        }
+    </script>
+    <script src="{{ url_for('static', filename='dashboard2.js') }}" defer></script>
+
+    <!-- Tailwind CSS for styling-->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js for line graph-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-blue-400">Skynet Dashboard</h1>
+            <div class="flex items-center gap-2">
+                <!-- Dropdown for selecting agents -->
+                <select id="agent-selector" class="bg-gray-800 text-white border border-gray-700 rounded p-2 focus:outline:none focus:border-blue-500">
+                    <option value="">Loading agents....</option>
+                </select>
+                <span class="relative flex h-3 w-3">
+                    <span id="ping-dot" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span id="solid-dot" class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <span id="status-indicator" class="text-green-400 font-semibold tracking-wide">SYSTEM ONLINE</span>
+            </div>
+        </header>
+
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+            <!-- CPU Card -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                <h2 class="text-gray-400 text-sm uppercase tracking-wider mb-2">CPU Usage</h2>
+                <div class="text-4xl font-bold text-blue-400" id="cpu-text">--%</div>
+            </div>
+
+            <!-- RAM Card -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                <h2 class="text-gray-400 text-sm uppercase tracking-wider mb-2">RAM Consumption</h2>
+                <div class="text-4xl font-bold text-purple-400" id="ram-text">--%</div>
+                <div class="text-sm text-gray-500 mt-1" id="ram-details">-- / -- GB</div>
+            </div>
+
+            <!-- Disk Card -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                <h2 class="text-gray-400 text-sm uppercase tracking-wider mb-2">Disk Free</h2>
+                <div class="text-4xl font-bold text-teal-400" id="disk-text">--%</div>
+                <div class="text-sm text-gray-500 mt-1" id="disk-details">-- GB available</div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+            <h2 class="text-gray-400 text-sm uppercase tracking-wider mb-4">Live System Performance</h2>
+            <canvas id="telemetryChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- Scrollable logs table section-->
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 mt-6">
+        <h2 class="text-gray-400 text-sm uppercase tracling-wider mb-4">Recent Event Logs</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-gray-300">
+                <thead class="bg-gray-700 text-gray-200 uppercase text-xs">
+                    <tr>
+                        <th class="p-3">Timestamp</th>
+                        <th class="p-3">CPU</th>
+                        <th class="p-3">RAM</th>
+                        <th class="p-3">Disk</th>
+                    </tr>
+                </thead>
+                <tbody id="log-table-body">
+<!-- Dynamically populated rows go here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+telemetry.log
+.env
+.idea/
+README.txt
