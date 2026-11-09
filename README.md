@@ -1,10 +1,10 @@
 # Telemetry API
 
-A Python-based telemetry system designed to collect, store, and visualize machine performance data from remote agents. The project captures metrics such as CPU usage, RAM usage, and storage information, then exposes them through a REST API and a dashboard for monitoring and analysis.
+A Python-based telemetry system designed to collect, store, and visualize machine performance data from remote agents. The project captures metrics such as CPU usage, RAM usage, and storage information.
 
 ## Overview
 
-This project was created to explore telemetry ingestion, backend API design, and real-time data collection in a practical environment. Remote agents periodically send hardware and system metrics to the API, which stores the data in a database and makes it available to a frontend dashboard for visualization.
+This project was created to explore telemetry ingestion, backend API design, and real-time data collection in a practical environment. Remote agents periodically send hardware and system metrics to the API.
 
 The system is structured around a clear data flow:
 
@@ -25,7 +25,7 @@ The system is structured around a clear data flow:
 ## Tech Stack
 
 - Python
-- FastAPI or Flask-based API layer
+- Flask
 - JavaScript / HTML for dashboard
 - PostgreSQL / TimescaleDB
 - SQLAlchemy
@@ -46,23 +46,17 @@ The project follows a simple layered approach:
 ```text
 telemetry_api/
 ├── api/
-│   ├── app.py
-│   ├── routes/
-│   ├── models/
-│   └── services/
-├── agents/
-│   └── collector.py
-├── dashboard/
-│   ├── static/
-│   └── templates/
+│   └── app.py
 ├── db/
-│   └── models/
-├── docker/
-│   ├── Dockerfile
-│   └── docker-compose.yml
+├── model/
+├── scripts/
+│   └── init_db.py
+├── static/
+├── templates/
+├── Dockerfile
+├── docker-compose.yaml
 ├── requirements.txt
-├── README.md
-└── .gitignore
+└── README.md
 ```
 
 ## Local Setup
@@ -70,8 +64,8 @@ telemetry_api/
 ### Prerequisites
 
 - Python 3.10+
-- Docker and Docker Compose
-- PostgreSQL or TimescaleDB
+- Docker and Docker Compose (for the containerized setup)
+- PostgreSQL with the TimescaleDB extension (for running the API directly)
 
 ### 1. Clone the repository
 
@@ -80,42 +74,44 @@ git clone https://github.com/jasonbussiere/telemetry_api.git
 cd telemetry_api
 ```
 
-### 2. Create a virtual environment
+### Run with Docker Compose
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configure environment variables
-
-Create a `.env` file with your database and application settings, for example:
+The Compose file is `docker-compose.yaml` in the repository root. Create a `.env` file there with the variables used by the database and API services:
 
 ```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=telemetry
-DB_USER=postgres
-DB_PASSWORD=your_password
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=telemetry
+JWT_SECRET_KEY=replace_with_a_secret_key
+AGENT_PASSWORD=replace_with_an_agent_password
 ```
 
-### 5. Start the application
+Start the database and API from the repository root:
 
 ```bash
-python app.py
+docker compose up --build
 ```
 
-Or, using Docker:
+Compose starts TimescaleDB and the API, initializes the database tables, and runs the Flask app with Gunicorn. The dashboard is available at <http://localhost:5000> and the Swagger docs at <http://localhost:5000/apidocs>. Stop the services with `Ctrl+C`; use `docker compose down` to remove the containers while retaining the database volume.
+
+### Run the API directly
+
+To run the API outside Docker, first start a PostgreSQL/TimescaleDB instance and create a `.env` file in the repository root. For this setup, configure the database URL rather than the Compose-specific database connection variables:
+
+```env
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/telemetry
+JWT_SECRET_KEY=replace_with_a_secret_key
+AGENT_PASSWORD=replace_with_an_agent_password
+```
+
+Create the database tables and TimescaleDB hypertable, then start Flask from the repository root:
 
 ```bash
-docker-compose up --build
+python scripts/init_db.py
+flask --app api.app run --host=0.0.0.0 --port=5000
 ```
+
+Open <http://localhost:5000> for the dashboard or <http://localhost:5000/apidocs> for the API documentation.
 
 ## Example Data Flow
 
