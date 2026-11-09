@@ -20,3 +20,5 @@ crashlytics.properties
 
 .env
 .idea
+.log
+__pycache__/
