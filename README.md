@@ -113,6 +113,85 @@ flask --app api.app run --host=0.0.0.0 --port=5000
 
 Open <http://localhost:5000> for the dashboard or <http://localhost:5000/apidocs> for the API documentation.
 
+## Run the local demo
+
+### Prerequisites
+
+- Git
+- Docker with the Docker Compose plugin
+- Python 3.10 or later
+
+### 1. Clone the repository and configure it
+
+```bash
+git clone https://github.com/jasonbussiere/telemetry_api.git
+cd telemetry_api
+cp .env.example .env
+```
+
+On Windows PowerShell, use `Copy-Item .env.example .env` instead of `cp`.
+
+Open `.env` and replace the example values with your own local secrets. Use the same `AGENT_PASSWORD` for the API and the agents. Do not commit `.env` or include real secrets in screenshots.
+
+### 2. Start the API and database
+
+From the repository root:
+
+```bash
+docker compose up --build -d
+docker compose ps
+```
+
+The dashboard is at <http://localhost:5000>; the API documentation is at <http://localhost:5000/apidocs>.
+
+If the API does not start, inspect its logs:
+
+```bash
+docker compose logs -f api
+```
+
+### 3. Install Python dependencies for the agents
+
+Run these commands from the repository root.
+
+macOS/Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+Windows PowerShell:
+
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+### 4. Start simulated agents
+
+From the repository root, run:
+
+```bash
+cd skynet-telemetry-client
+python squad_runner.py --count 5
+```
+
+The launcher starts five agent processes and writes their output to `telemetry.log` in this directory. The agents send telemetry to the local API every few seconds. Refresh the dashboard to see the incoming data. Press `Ctrl+C` in the agent terminal to stop them.
+
+These are multiple processes running on **one machine**. They report separate agent identities, but collect metrics from the same host; they do not represent five separate physical computers.
+
+### 5. Stop the API and database
+
+In another terminal, from the repository root:
+
+```bash
+docker compose down
+```
+
+This stops the containers and keeps the database volume. To also remove the local database data, run `docker compose down -v`.
 ## Example Data Flow
 
 1. Agent collects:
