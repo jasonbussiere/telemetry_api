@@ -1,4 +1,5 @@
 import argparse
+import os
 import random
 import socket
 from platform import platform
@@ -16,6 +17,12 @@ class T850Agent:
         self.agent_id = agent_id
         self.base_url = base_url
         self.hostname = f"T850-{self.agent_id}"
+        self.agent_password = os.getenv("AGENT_PASSWORD")
+        if not self.agent_password:
+            raise RuntimeError(
+                "AGENT_PASSWORD is not set. Add it to the repository-root .env"
+                "or set it in the environment."
+            )
         self.token=self.authenticate()
 
     def authenticate(self):
