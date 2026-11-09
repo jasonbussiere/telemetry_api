@@ -1,13 +1,16 @@
 import argparse
 import os
 import random
-import socket
+import time
+from pathlib import Path
 from platform import platform
 
 import psutil
 import requests
-import time
+from dotenv import load_dotenv
 
+# Resolve .env from the repository root, regardless of the current directory.
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 
 class T850Agent:
